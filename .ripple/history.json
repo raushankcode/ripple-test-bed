@@ -4,5 +4,23 @@
     "type": "baseline_snapshot",
     "source": "initial_scan",
     "metadata": "files:1|symbols:0"
+  },
+  {
+    "timestamp": 1783386455266,
+    "type": "symbol_created",
+    "source": "src/utils.ts::funcA",
+    "kind": "function",
+    "symbolHash": "b204d26dde695fc170741b8cd9d31c6ef9f06dbb",
+    "layer": "logic",
+    "changeGroup": "save_1783386453275_lgmed"
+  },
+  {
+    "timestamp": 1783386455266,
+    "type": "symbol_created",
+    "source": "src/utils.ts::funcB",
+    "kind": "function",
+    "symbolHash": "ba29020184f7cfc7baf4821814deabe2cc8d11ac",
+    "layer": "logic",
+    "changeGroup": "save_1783386453275_lgmed"
   }
 ]
