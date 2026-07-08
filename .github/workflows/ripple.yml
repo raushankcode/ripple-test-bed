@@ -25,6 +25,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: raushankcode/ripple # This is your tool's repo
+          ref: main
           path: ./.ripple-tool # Check it out into a local directory
 
       - name: Setup Node
