@@ -22,9 +22,19 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-      - name: Ripple CI gate
-        run: npx -y @getripple/cli@1.0.12 ci --base origin/\${{ github.base_ref || 'main' }} --github-annotations --sha \${{ github.event.pull_request.head.sha || github.sha }}
-        env:
-          RIPPLE_API_KEY: ${{ secrets.RIPPLE_API_KEY }}
-          RIPPLE_CLOUD_URL: ${{ secrets.RIPPLE_CLOUD_URL }}
+          # --- THE FINAL, ROBUST FIX ---
+- name: Ripple CI gate
+  env:
+    RIPPLE_API_KEY: ${{ secrets.RIPPLE_API_KEY }}
+    RIPPLE_CLOUD_URL: ${{ secrets.RIPPLE_CLOUD_URL }}
+  run: |
+    # Clear any potentially cached npx versions to be safe
+    rm -rf ~/.npm/_npx
+
+    # Install the local packages. This will place them in node_modules
+    npm install ./getripple-core-*.tgz
+    npm install ./getripple-cli-*.tgz
+
+    # Run the ripple binary DIRECTLY from the local node_modules folder.
+    # This guarantees we are using the version we just installed from the .tgz file.
+    ./node_modules/.bin/ripple ci --base origin/${{ github.base_ref || 'main' }} --github-annotations --sha ${{ github.event.pull_request.head.sha || github.sha }}
