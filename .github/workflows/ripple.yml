@@ -2,8 +2,7 @@ name: Ripple Enterprise Gate
 
 on:
   pull_request:
-  push:
-    branches: [main, master]
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: read
@@ -11,30 +10,45 @@ permissions:
   checks: write
 
 jobs:
-  ripple:
+  ripple-gate:
     name: Ripple authorization gate
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      # Step 1: Checkout the code of the PULL REQUEST itself
+      - name: Checkout PR Code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      # Step 2: Checkout the ripple-main repo into a sub-directory
+      - name: Checkout Ripple Main Repo
+        uses: actions/checkout@v4
+        with:
+          repository: raushankcode/ripple # This is your tool's repo
+          path: ./.ripple-tool # Check it out into a local directory
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          # --- THE FINAL, ROBUST FIX ---
-- name: Ripple CI gate
-  env:
-    RIPPLE_API_KEY: ${{ secrets.RIPPLE_API_KEY }}
-    RIPPLE_CLOUD_URL: ${{ secrets.RIPPLE_CLOUD_URL }}
-  run: |
-    # Clear any potentially cached npx versions to be safe
-    rm -rf ~/.npm/_npx
+          node-version: 20
 
-    # Install the local packages. This will place them in node_modules
-    npm install ./getripple-core-*.tgz
-    npm install ./getripple-cli-*.tgz
+      - name: Build and Install Ripple from Source
+        run: |
+          # Navigate into the tool's source code
+          cd ./.ripple-tool
+          # Install dependencies and build it
+          npm install
+          npm run build --workspaces
+          # Install the built packages globally inside the runner
+          npm install -g ./packages/core
+          npm install -g ./packages/cli
+          # Go back to the root of the user's repo
+          cd ..
 
-    # Run the ripple binary DIRECTLY from the local node_modules folder.
-    # This guarantees we are using the version we just installed from the .tgz file.
-    ./node_modules/.bin/ripple ci --base origin/${{ github.base_ref || 'main' }} --github-annotations --sha ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Ripple CI gate
+        env:
+          RIPPLE_API_KEY: ${{ secrets.RIPPLE_API_KEY }}
+          RIPPLE_CLOUD_URL: ${{ secrets.RIPPLE_CLOUD_URL }}
+        run: |
+          # Now run the globally installed 'ripple' command
+          ripple ci --base origin/${{ github.base_ref || 'main' }} --github-annotations --sha ${{ github.event.pull_request.head.sha || github.sha }}
