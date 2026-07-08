@@ -25,7 +25,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: raushankcode/ripple # This is your tool's repo
-          ref: main
+          ref: v13-test # Or whatever your dev branch is named
           path: ./.ripple-tool # Check it out into a local directory
           token: ${{ secrets.CROSS_REPO_PAT }} # <-- THIS IS THE FIX
 
