@@ -27,6 +27,7 @@ jobs:
           repository: raushankcode/ripple # This is your tool's repo
           ref: main
           path: ./.ripple-tool # Check it out into a local directory
+          token: ${{ secrets.CROSS_REPO_PAT }} # <-- THIS IS THE FIX
 
       - name: Setup Node
         uses: actions/setup-node@v4
