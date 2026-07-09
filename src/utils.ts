@@ -2,7 +2,7 @@
 export function funcA(input: string): string {
   // This is the function we plan to change.
   return `Processed A: ${input}`;
-  //right change, love
+  //right change, love, new
 }
 
 export function funcB(input: string): string {
