@@ -1,3 +1,4 @@
+
 name: Ripple Enterprise Gate
 
 on:
@@ -24,6 +25,19 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          - name: Direct receipt test (bypasses CLI entirely)
+        run: |
+          SHA="${{ github.event.pull_request.head.sha || github.sha }}"
+          RESULT=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$RIPPLE_CLOUD_URL/api/audit" \
+            -H "Authorization: Bearer $RIPPLE_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "{\"protocol\":\"ripple-audit\",\"intentId\":\"ci-direct-${SHA:0:8}\",\"commitSha\":\"$SHA\",\"branch\":\"test\",\"actor\":\"test\",\"source\":\"ci\",\"decision\":\"continue\",\"payload\":{\"test\":true}}")
+          echo "Direct audit API status: $RESULT"
+          if [ "$RESULT" != "200" ]; then echo "❌ API call failed"; exit 1; fi
+          echo "✅ Direct API call succeeded"
+        env:
+          RIPPLE_API_KEY: ${{ secrets.RIPPLE_API_KEY }}
+          RIPPLE_CLOUD_URL: ${{ secrets.RIPPLE_CLOUD_URL }}
 
       - name: Install Ripple from local package
         run: |
