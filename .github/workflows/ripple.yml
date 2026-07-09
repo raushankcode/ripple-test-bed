@@ -1,56 +1,51 @@
+ripple-gate:
+  name: Ripple authorization gate
+  runs-on: ubuntu-latest
+  needs: build-ripple-cli # Keep this if you are using the two-job workflow
 
-name: Ripple Enterprise Gate
+  steps:
+    - name: Checkout PR Code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
-on:
-  pull_request:
-  push:
-    branches: [main, master]
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: "22.x" # Updated to a current LTS version
 
-permissions:
-  contents: read
-  pull-requests: read
-  checks: write
+    # THIS STEP IS NOW CORRECTLY INDENTED
+    - name: Direct receipt test (bypasses CLI entirely)
+      run: |
+        SHA="${{ github.event.pull_request.head.sha || github.sha }}"
+        echo "Testing with SHA: $SHA"
+        RESULT=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$RIPPLE_CLOUD_URL/api/audit" \
+          -H "Authorization: Bearer $RIPPLE_API_KEY" \
+          -H "Content-Type: application/json" \
+          -d "{\"protocol\":\"ripple-audit\",\"intentId\":\"ci-direct-${SHA:0:8}\",\"commitSha\":\"$SHA\",\"branch\":\"test\",\"actor\":\"direct-test\",\"source\":\"ci\",\"decision\":\"continue\",\"payload\":{\"test\":true}}")
 
-jobs:
-  ripple:
-    name: Ripple authorization gate
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+        echo "Direct audit API call returned HTTP status: $RESULT"
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          - name: Direct receipt test (bypasses CLI entirely)
-        run: |
-          SHA="${{ github.event.pull_request.head.sha || github.sha }}"
-          RESULT=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$RIPPLE_CLOUD_URL/api/audit" \
-            -H "Authorization: Bearer $RIPPLE_API_KEY" \
-            -H "Content-Type: application/json" \
-            -d "{\"protocol\":\"ripple-audit\",\"intentId\":\"ci-direct-${SHA:0:8}\",\"commitSha\":\"$SHA\",\"branch\":\"test\",\"actor\":\"test\",\"source\":\"ci\",\"decision\":\"continue\",\"payload\":{\"test\":true}}")
-          echo "Direct audit API status: $RESULT"
-          if [ "$RESULT" != "200" ]; then echo "❌ API call failed"; exit 1; fi
-          echo "✅ Direct API call succeeded"
-        env:
-          RIPPLE_API_KEY: ${{ secrets.RIPPLE_API_KEY }}
-          RIPPLE_CLOUD_URL: ${{ secrets.RIPPLE_CLOUD_URL }}
+        if [ "$RESULT" != "200" ]; then 
+          echo "❌ Direct API call failed. This proves a problem with secrets, network, or the cloud API endpoint itself."
+          exit 1
+        fi
 
-      - name: Install Ripple from local package
-        run: |
-          npm install -g ./getripple-core-1.0.12.tgz
-          npm install -g ./getripple-cli-1.0.12.tgz
+        echo "✅ Direct API call succeeded. The connection to the cloud is healthy."
+      env:
+        RIPPLE_API_KEY: ${{ secrets.RIPPLE_API_KEY }}
+        RIPPLE_CLOUD_URL: ${{ secrets.RIPPLE_CLOUD_URL }}
 
-      - name: Verify API key is set
-        run: node -e "console.log('API KEY SET:', !!process.env.RIPPLE_API_KEY, '| PREFIX:', process.env.RIPPLE_API_KEY?.slice(0,10))"
-        env:
-          RIPPLE_API_KEY: ${{ secrets.RIPPLE_API_KEY }}
+    - name: Download Ripple CLI Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: ripple-cli-packages
 
-      - name: Ripple CI gate
-        run: ripple ci --base origin/${{ github.base_ref || 'main' }} --github-annotations --sha ${{ github.event.pull_request.head.sha || github.sha }}
-        env:
-          RIPPLE_API_KEY: ${{ secrets.RIPPLE_API_KEY }}
-          RIPPLE_CLOUD_URL: ${{ secrets.RIPPLE_CLOUD_URL }}
+    - name: Ripple CI gate
+      env:
+        RIPPLE_API_KEY: ${{ secrets.RIPPLE_API_KEY }}
+        RIPPLE_CLOUD_URL: ${{ secrets.RIPPLE_CLOUD_URL }}
+      run: |
+        npm install ./getripple-core-*.tgz
+        npm install ./getripple-cli-*.tgz
+        ./node_modules/.bin/ripple ci --base origin/${{ github.base_ref || 'main' }} --github-annotations --sha ${{ github.event.pull_request.head.sha || github.sha }}
