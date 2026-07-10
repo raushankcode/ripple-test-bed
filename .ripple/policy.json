@@ -30,6 +30,15 @@
       ],
       "risk": "low",
       "allowPrMode": true
+    },
+    {
+      "paths": [
+        ".env",
+        ".env.*"
+      ],
+      "risk": "critical",
+      "requireHumanBeforeEdit": true,
+      "requireHumanBeforeMerge": true
     }
   ]
 }

@@ -2,8 +2,7 @@ name: Ripple Enterprise Gate
 
 on:
   pull_request:
-  push:
-    branches: [main, master]
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: read
@@ -11,20 +10,28 @@ permissions:
   checks: write
 
 jobs:
-  ripple:
+  ripple-gate:
     name: Ripple authorization gate
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout PR Code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Setup Node
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
+
       - name: Ripple CI gate
-        run: npx -y @getripple/cli@1.0.11 ci --base origin/${{ github.base_ref }} --github-annotations --sha ${{ github.sha }}
         env:
           RIPPLE_API_KEY: ${{ secrets.RIPPLE_API_KEY }}
           RIPPLE_CLOUD_URL: ${{ secrets.RIPPLE_CLOUD_URL }}
+        run: |
+          # Install the local packages we copied into the repo
+          npm install ./getripple-core-*.tgz
+          npm install ./getripple-cli-*.tgz
+
+          # Run the gate using the now-installed binary
+          ./node_modules/.bin/ripple ci --base origin/${{ github.base_ref || 'main' }} --github-annotations --sha ${{ github.event.pull_request.head.sha || github.sha }}
