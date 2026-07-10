@@ -29,9 +29,12 @@ jobs:
           RIPPLE_API_KEY: ${{ secrets.RIPPLE_API_KEY }}
           RIPPLE_CLOUD_URL: ${{ secrets.RIPPLE_CLOUD_URL }}
         run: |
-          # Install the local packages we copied into the repo
+          # This proves we are not using npx cache
+          if [ -d "~/.npm/_npx" ]; then rm -rf ~/.npm/_npx; fi
+
+          # Install our local, fixed packages from the repo root
           npm install ./getripple-core-*.tgz
           npm install ./getripple-cli-*.tgz
 
-          # Run the gate using the now-installed binary
+          # Run the gate using the locally installed binary
           ./node_modules/.bin/ripple ci --base origin/${{ github.base_ref || 'main' }} --github-annotations --sha ${{ github.event.pull_request.head.sha || github.sha }}
