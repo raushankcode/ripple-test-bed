@@ -4,5 +4,45 @@
     "type": "baseline_snapshot",
     "source": "initial_scan",
     "metadata": "files:1|symbols:2"
+  },
+  {
+    "timestamp": 1783758269970,
+    "type": "symbol_modified",
+    "source": "src/utils.ts::funcA",
+    "kind": "function",
+    "symbolHash": "b204d26dde695fc170741b8cd9d31c6ef9f06dbb",
+    "previousHash": "d0d77eff5fd53c015f9df3b9d75a6f73e7aeac61",
+    "layer": "logic",
+    "changeGroup": "save_1783758267743_1o41y"
+  },
+  {
+    "timestamp": 1783758269970,
+    "type": "symbol_modified",
+    "source": "src/utils.ts::funcB",
+    "kind": "function",
+    "symbolHash": "ba29020184f7cfc7baf4821814deabe2cc8d11ac",
+    "previousHash": "649b63295bcb64c11d97424fa9c7aea8dd2d38ee",
+    "layer": "logic",
+    "changeGroup": "save_1783758267743_1o41y"
+  },
+  {
+    "timestamp": 1783758758812,
+    "type": "symbol_modified",
+    "source": "src/utils.ts::funcA",
+    "kind": "function",
+    "symbolHash": "3e163c7629a0b00cacd770f3d8e1fd8d9ffaa98f",
+    "previousHash": "b204d26dde695fc170741b8cd9d31c6ef9f06dbb",
+    "layer": "logic",
+    "changeGroup": "save_1783758756430_ia7hc"
+  },
+  {
+    "timestamp": 1783758758812,
+    "type": "symbol_modified",
+    "source": "src/utils.ts::funcB",
+    "kind": "function",
+    "symbolHash": "649b63295bcb64c11d97424fa9c7aea8dd2d38ee",
+    "previousHash": "ba29020184f7cfc7baf4821814deabe2cc8d11ac",
+    "layer": "logic",
+    "changeGroup": "save_1783758756430_ia7hc"
   }
 ]
