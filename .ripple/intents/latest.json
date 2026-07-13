@@ -1,9 +1,9 @@
 {
   "protocol": "ripple-change-intent",
   "version": 1,
-  "id": "intent-mrg2yl90-414f539cae",
-  "createdAt": "2026-07-11T08:06:05.066Z",
-  "task": "Final Unblock Test",
+  "id": "intent-mrjucff6-0791c3e999",
+  "createdAt": "2026-07-13T23:15:58.865Z",
+  "task": "Reddit Demo: Widen Boundary",
   "targetFile": "src/utils.ts",
   "risk": "safe",
   "tokenBudget": 4000,
