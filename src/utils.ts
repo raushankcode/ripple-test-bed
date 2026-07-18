@@ -1,6 +1,6 @@
 // src/utils.ts
 export function funcA(input: string): string {
-  // This is the function we plan to change.
+  // This is a simple, clean change.
   return `Processed A: ${input}`;
   //allowed
 }
